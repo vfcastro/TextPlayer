@@ -82,6 +82,4 @@ public class Composer {
 			}
 		}
 				
-		return sequence;
-	}
-}
+		return sequence;		

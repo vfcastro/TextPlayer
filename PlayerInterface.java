@@ -1,15 +1,5 @@
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-//import java.io.File;
-//import java.io.FileWriter;
-//import java.io.IOException;
-//import java.util.Scanner;
-
-
-import java.lang.Thread.State;
-
-//import javax.swing.JFileChooser;
-//import javax.swing.JTextArea;
 import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.Sequence;
 import javax.swing.JTextArea;
@@ -42,26 +32,17 @@ public class PlayerInterface implements ActionListener{
 		
 		//Botao Tocar eh clicado
 		if(acao.equals("Tocar")){
-			if(this.player.getState().compareTo(State.TERMINATED) == 0) {
-				//player.interrupt();
+			
+			// Verifica se o player esta em execucao
+			if(!player.isAlive()){
 				this.createPlayer();
+				this.player.start();
 			}
-				if(!player.isAlive()){
-					this.setText();
-					this.player.setSequence(this.seq);
-					this.player.start();
-				}
-				else{					
-
-				}
 		}
 		
 		//Botão Parar eh clicado
 		else if(acao.equals("Parar")){
 			player.interrupt();
-			
-			//Cria um novo player apos parar a execução do atual
-			this.createPlayer();
 			
 		}
 
@@ -75,7 +56,6 @@ public class PlayerInterface implements ActionListener{
 	private void createPlayer() {
 		try{
 			this.composer = new Composer();
-			//this.seq = composer.compose(this.text.getText()+" ", instrument);
 			this.setText();
 		
 			this.player = new AudioPlayer(seq, bpm);

@@ -29,11 +29,9 @@ public class AudioPlayer extends Thread
 			{
 				public void meta(MetaMessage event)
 				{
-					if (event.getType() == 47)					{
+					if (event.getType() == 47)
+					{
 						sm_sequencer.close();
-					}
-					if(event.getType() == 51){
-						sm_sequencer.setTempoInBPM(60000000 / Float.parseFloat(event.getData().toString()));
 					}
 				}
 			});
@@ -53,7 +51,4 @@ public class AudioPlayer extends Thread
 		}	
 	}
 	
-	public void setSequence (Sequence inSeq){
-		this.seq = inSeq;
-	}
 }

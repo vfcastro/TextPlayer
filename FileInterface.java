@@ -7,8 +7,6 @@ import java.util.Scanner;
 
 import javax.swing.JFileChooser;
 import javax.swing.JTextArea;
-//import javax.sound.midi.InvalidMidiDataException;
-//import javax.sound.midi.Sequence;
 
 
 public class FileInterface implements ActionListener{
@@ -21,11 +19,9 @@ public class FileInterface implements ActionListener{
 		this.text = text;
 	}
 	
-//	@Override
+	@Override
 	public void actionPerformed(ActionEvent e) {
 		String acao = e.getActionCommand();
-		//Debug das acoes escutadas
-		System.err.println(acao);
 		
 		//Botao Abrir eh clicado
 		if(acao.equals("Abrir")){
