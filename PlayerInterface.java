@@ -10,7 +10,6 @@ public class PlayerInterface implements ActionListener{
 	private MainWindow wnd;
 	private JTextArea text;
 	private int instrument;
-	private int bpm;
 	private Sequence seq;
 	private AudioPlayer player;
 	private Composer composer;
@@ -18,9 +17,6 @@ public class PlayerInterface implements ActionListener{
 	public PlayerInterface(MainWindow wnd, JTextArea text) {
 		this.wnd = wnd;
 		this.text = text;
-		this.instrument = 1;
-		this.bpm = 60;
-
 		this.createPlayer();
 	}
 	
@@ -50,7 +46,7 @@ public class PlayerInterface implements ActionListener{
 	
 	private void setText(){
 		this.text = this.wnd.getComposer();
-		this.seq = composer.compose(this.text.getText()+" ", instrument);
+		this.seq = composer.compose(this.text.getText()+" ");
 	}
 	
 	private void createPlayer() {
@@ -58,7 +54,7 @@ public class PlayerInterface implements ActionListener{
 			this.composer = new Composer();
 			this.setText();
 		
-			this.player = new AudioPlayer(seq, bpm);
+			this.player = new AudioPlayer(seq);
 		}
 		catch (InvalidMidiDataException e2){
 			e2.printStackTrace();

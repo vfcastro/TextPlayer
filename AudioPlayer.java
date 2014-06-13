@@ -15,12 +15,10 @@ public class AudioPlayer extends Thread
 	private int BPM;
 	
 
-	public AudioPlayer(Sequence inSeq, int inBPM){
+	public AudioPlayer(Sequence inSeq){
 		this.seq = inSeq;
-		this.BPM = inBPM;
 	}
 	
-
 	public void run()
 	{
 		try {
@@ -29,9 +27,11 @@ public class AudioPlayer extends Thread
 			{
 				public void meta(MetaMessage event)
 				{
-					if (event.getType() == 47)
-					{
+					if (event.getType() == 47){
 						sm_sequencer.close();
+					}
+					if(event.getType() == 51){
+						sm_sequencer.setTempoInBPM(getBPMFromEvent(event.getData()));
 					}
 				}
 			});
@@ -51,4 +51,7 @@ public class AudioPlayer extends Thread
 		}	
 	}
 	
+	private float getBPMFromEvent(byte[] data){
+		return Float.parseFloat(data.toString()) * sm_sequencer.getTempoInBPM();
+	}
 }
