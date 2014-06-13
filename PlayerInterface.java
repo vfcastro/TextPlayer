@@ -9,7 +9,6 @@ public class PlayerInterface implements ActionListener{
 
 	private MainWindow wnd;
 	private JTextArea text;
-	private int instrument;
 	private Sequence seq;
 	private AudioPlayer player;
 	private Composer composer;
@@ -17,6 +16,7 @@ public class PlayerInterface implements ActionListener{
 	public PlayerInterface(MainWindow wnd, JTextArea text) {
 		this.wnd = wnd;
 		this.text = text;
+
 		this.createPlayer();
 	}
 	
