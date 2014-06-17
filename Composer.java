@@ -2,7 +2,7 @@ import java.nio.ByteBuffer;
 import java.text.StringCharacterIterator;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.random;
+import java.util.Random;
 import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.MetaMessage;
 import javax.sound.midi.MidiEvent;
@@ -23,17 +23,17 @@ public class Composer {
 	private static final int OCTAVE_FACTOR_DEFAULT = 0;
 	private static final int NOTE_DURATION_FACTOR_DEFAULT = 0;
 	private static final int TIMBRE_DEFAULT = 0;
-	private static final int BPM_DEFAULT = 120;
+	private static final float BPM_DEFAULT = 120f;
 	private static final int OCTAVE_INCREASE_FACTOR = 12;
 	private static final int OCTAVE_DECREASE_FACTOR = -12;
-	private static final double BPM_INCREASE_FACTOR = 1.50;
-	private static final double BPM_DECREASE_FACTOR = 0.50;
+	private static final float BPM_INCREASE_FACTOR = 1.50f;
+	private static final float BPM_DECREASE_FACTOR = 0.50f;
 	private static final int NOTE_DURATION_INCREASE_FACTOR = 1;
 	
-	private static final String CONSONANTS = "hH jJ kK lL mM nN pP qQ rR sS tT vV wW xX yY zZ";
-	private static final String VOGALS = "iI oO uU";
-	private static final String EVEN = "0 2 4 6 8";
-	private static final String ODD = "1 3 5 7 9";
+	private static final String CONSONANTS = "hHjJkKlLmMnNpPqQrRsStTvVwWxXyYzZ";
+	private static final String VOGALS = "iIoOuU";
+	private static final String EVEN = "02468";
+	private static final String ODD = "13579";
 	private static final String COMMA = ",";
 	private static final String SEMICOLON = ";";
 	private static final String EXCLAMATION_MARK = "!";
@@ -42,6 +42,7 @@ public class Composer {
 	private static final String SINGLE_QUOTE = "\'";
 	private static final String DOT = ".";
 	private static final String NEW_LINE = System.getProperty("line.separator");
+	private static final String SPACE = " ";
 	
 	private static final Map<Character, Integer> NOTES_MAP;
     static
@@ -69,27 +70,26 @@ public class Composer {
 	private int currentOctaveFactor = OCTAVE_FACTOR_DEFAULT;
 	private int currentNoteDurationFactor = NOTE_DURATION_FACTOR_DEFAULT;
 	private int  currentTimbre = TIMBRE_DEFAULT;
-	private int currentBPM = BPM_DEFAULT;
-	
+	private float currentBPM = BPM_DEFAULT;
 	
 	public Composer() throws InvalidMidiDataException{
 		sequence = new Sequence(TIMING_TYPE, TIMING_RESOLUTION);
 		track = sequence.createTrack();
 	}
 	
-	private void setInstrument (int instrument) throws InvalidMidiDataException{
-		track.add(new MidiEvent(new ShortMessage(ShortMessage.PROGRAM_CHANGE,CHANNEL,instrument,0),0));
+	private void setInstrument (int instrument, long tick) throws InvalidMidiDataException{
+		track.add(new MidiEvent(new ShortMessage(ShortMessage.PROGRAM_CHANGE,CHANNEL,instrument,0),tick));
 	}
 	
 	private MidiEvent createNoteOnEvent(int note, long tick)	{
 		return createNoteEvent(ShortMessage.NOTE_ON,note,VELOCITY,tick);
 	}
 
-	private static MidiEvent createNoteOffEvent(int note, long tick){
+	private MidiEvent createNoteOffEvent(int note, long tick){
 		return createNoteEvent(ShortMessage.NOTE_OFF,note,0,tick);
 	}
 
-	private static MidiEvent createNoteEvent(int command, int note, int velocity, long tick){
+	private MidiEvent createNoteEvent(int command, int note, int velocity, long tick){
 		ShortMessage message = new ShortMessage();
 		
 		try {
@@ -102,18 +102,20 @@ public class Composer {
 	}
 	
 	private MidiEvent createBPMIncreaseEvent(long tick)	{
-		return createBPMEvent(BPM_INCREASE_FACTOR,tick);
+		currentBPM = currentBPM * BPM_INCREASE_FACTOR;
+		return createBPMEvent(currentBPM,tick);
 	}
 
-	private static MidiEvent createBPMDecreaseEvent(long tick){
-		return createBPMEvent(BPM_DECREASE_FACTOR,tick);
+	private MidiEvent createBPMDecreaseEvent(long tick){
+		currentBPM = currentBPM * BPM_DECREASE_FACTOR;
+		return createBPMEvent(currentBPM,tick);
 	}
 	
-	private static MidiEvent createBPMEvent(double value, long tick){
+	private MidiEvent createBPMEvent(float value, long tick){
 		MetaMessage message = new MetaMessage();
 		
 		try {
-			message.setMessage(META_EVENT_SET_TEMPO,Double.toString(value).getBytes(),Double.toString(value).getBytes().length);
+			message.setMessage(META_EVENT_SET_TEMPO,ByteBuffer.allocate(Float.SIZE).putFloat(value).array(),Float.SIZE);
 		} catch (InvalidMidiDataException e) {
 			e.printStackTrace();
 		}
@@ -121,34 +123,33 @@ public class Composer {
 		return event;
 	}
 	
-	private void restoreDefaults(){
+	private void restoreDefaults(long tick) throws InvalidMidiDataException{
 		currentSemitomFactor = SEMITOM_FACTOR_DEFAULT;
 		currentOctaveFactor = OCTAVE_FACTOR_DEFAULT;
 		currentNoteDurationFactor = NOTE_DURATION_FACTOR_DEFAULT;
 		currentTimbre = TIMBRE_DEFAULT;
 		currentBPM = BPM_DEFAULT;
+		setInstrument(TIMBRE_DEFAULT,tick);
+		createBPMEvent(BPM_DEFAULT,tick);
+		
 	}
 	
-	public Sequence compose (String text){		
+	public Sequence compose (String text) throws InvalidMidiDataException{		
 
 		StringCharacterIterator str = new StringCharacterIterator(text);
-		int tick = 0;
+		long tick = 0;
 
 		while(str.current() != StringCharacterIterator.DONE){
 			char currentChar = str.current();
 			
 			if(CONSONANTS.contains(Character.toString(currentChar))){
-				if(currentSemitomFactor > 0){
-					currentSemitomFactor--;
-					str.next();
-				}
+				currentSemitomFactor--;
+				str.next();
 			}
 			else 
 				if(VOGALS.contains(Character.toString(currentChar))){
-					if(currentSemitomFactor < 127){
-						currentSemitomFactor++;
-						str.next();
-					}
+					currentSemitomFactor++;
+					str.next();
 				}
 				else
 					if(EVEN.contains(Character.toString(currentChar))){
@@ -172,7 +173,8 @@ public class Composer {
 								}
 								else
 									if(EXCLAMATION_MARK.contains(Character.toString(currentChar)) || QUESTION_MARK.contains(Character.toString(currentChar))){
-										currentTimbre = random.nextInt(128);
+										currentTimbre = (new Random()).nextInt(128);
+										setInstrument(currentTimbre,tick);
 										str.next();
 									}
 									else
@@ -181,10 +183,11 @@ public class Composer {
 												currentNoteDurationFactor+= NOTE_DURATION_INCREASE_FACTOR;
 											else
 												currentNoteDurationFactor = NOTE_DURATION_FACTOR_DEFAULT;
+											str.next();
 										}
 										else
 											if(DOT.contains(Character.toString(currentChar)) || NEW_LINE.contains(Character.toString(currentChar))){
-												currentOctaveFactor-=OCTAVE_DECREASE_FACTOR;
+												restoreDefaults(tick);
 												str.next();
 											}
 											else
@@ -192,22 +195,25 @@ public class Composer {
 													int note =  NOTES_MAP.get(str.current()) + currentSemitomFactor + currentOctaveFactor;
 													if(note >= 0 && note <= 127){
 														track.add(createNoteOnEvent(note,tick));
-														tick++;
+														tick+=currentNoteDurationFactor + 1;
 														track.add(createNoteOffEvent(note,tick));
 														str.next();
 													}
 													else{
 														track.add(createNoteOnEvent(NOTES_MAP.get(str.current()),tick));
-														tick++;
+														tick+=currentNoteDurationFactor + 1;
 														track.add(createNoteOffEvent(NOTES_MAP.get(str.current()),tick));
 														str.next();
 													}
 												}
 												else{
-													tick++;
-													str.next();	
+													if(SPACE.contains(Character.toString(currentChar))){
+														tick+=currentNoteDurationFactor + 1;
+														str.next();
+													}
+													else
+														str.next();	
 												}
-			
 		}	
 		return sequence;		
 	}

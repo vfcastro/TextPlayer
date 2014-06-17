@@ -1,3 +1,6 @@
+import java.nio.ByteBuffer;
+import java.util.Arrays;
+
 import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.MidiSystem;
 import javax.sound.midi.MidiUnavailableException;
@@ -12,8 +15,7 @@ public class AudioPlayer extends Thread
 
 	private static Sequencer	sm_sequencer;
 	private Sequence seq;
-	private int BPM;
-	
+
 
 	public AudioPlayer(Sequence inSeq){
 		this.seq = inSeq;
@@ -37,7 +39,6 @@ public class AudioPlayer extends Thread
 			});
 			sm_sequencer.open();
 			sm_sequencer.setSequence(seq);
-			sm_sequencer.setTempoInBPM(BPM);
 			sm_sequencer.start();
 			
 			while(sm_sequencer.isRunning()){
@@ -52,6 +53,6 @@ public class AudioPlayer extends Thread
 	}
 	
 	private float getBPMFromEvent(byte[] data){
-		return Float.parseFloat(data.toString()) * sm_sequencer.getTempoInBPM();
+		return ByteBuffer.wrap(data).getFloat();
 	}
 }

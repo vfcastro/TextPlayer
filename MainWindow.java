@@ -70,7 +70,7 @@ public class MainWindow extends JFrame{
 		this.add(instructionsLabel, BorderLayout.NORTH);
 		
 		//Configs da area de composicao
-		this.composerTextArea = new JTextArea(100,10);		
+		this.composerTextArea = new JTextArea(100,10);		 
 		this.composerTextArea.setWrapStyleWord(true);		
 		this.composerTextArea.setMinimumSize(new Dimension(320, 300));
 		this.composerTextArea.setSize(300, 500);
@@ -86,7 +86,7 @@ public class MainWindow extends JFrame{
 		//Config Painel dos botoes
 		this.buttonsPanel = new JPanel(new GridLayout(1, 4, 10, 10));
 		this.buttonsPanel.setSize(100, 100);
-		this.add(buttonsPanel, BorderLayout.SOUTH);		
+		this.add(buttonsPanel, BorderLayout.SOUTH);
 
 		//Configs dos botões
 		this.playButton = new JButton("Tocar", new ImageIcon ("icons/play.png"));

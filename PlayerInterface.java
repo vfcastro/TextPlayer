@@ -44,7 +44,7 @@ public class PlayerInterface implements ActionListener{
 
 	}
 	
-	private void setText(){
+	private void setText() throws InvalidMidiDataException{
 		this.text = this.wnd.getComposer();
 		this.seq = composer.compose(this.text.getText()+" ");
 	}
